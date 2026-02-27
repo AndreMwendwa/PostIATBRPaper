@@ -21,7 +21,7 @@ apollo_initialise()
 # Set the core controls   
 ### Set core controls
 apollo_control = list(
-  modelDescr      = "Error components logit model on Swiss route choice data, uncorrelated Lognormals in preference space, with panel effect term",
+  modelDescr      = "Round 1 only",
   indivID         = "PersonID",  
   nCores          = 63,
   outputDirectory = "output"
@@ -30,7 +30,9 @@ apollo_control = list(
 # Read in the mode choice data
 database= read.csv("Multimodal Options in MaaS_R1.csv", header = TRUE)
 
-
+# Restricting to round 1
+database_1 <- database[database$rounds == 1, ]
+database <- database_1
 
 ################### Step 3 #########################
 # Define the model parameters and set the starting value
@@ -49,6 +51,7 @@ apollo_beta = c(
   b_main_pt        = -0.04,
   b_main_drive     = -0.01,
   b_main_ridehail  = -0.04,
+  b_tr             =  0,
   
   # -- ?????????????????? -- #
   sigma_ec_BS      =  0,
@@ -71,7 +74,7 @@ apollo_fixed = c("ASC_Walk")
 
 apollo_draws = list(
   interDrawsType = "mlhs",
-  interNDraws    = 500,
+  interNDraws    = 50,
   interUnifDraws = c(),
   interNormDraws  = c(
     
@@ -181,6 +184,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt      * bicpt_time +
     b_wait    * bicpt_wait +
     b_cost         * bicpt_cost 
+    + b_tr * 1
   
   
   
@@ -191,7 +195,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_wait      * drpt_wait +
     b_main_pt        * drpt_time +
     b_cost           * (drpt_drv_cost + drpt_park_cost + drpt_cost) 
-  
+  + b_tr * 1
   
   #-- 9. ?????????????????? PT_RHS --#
   V[['PT_RHS']] =
@@ -208,7 +212,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_bs         * bspt_bs_time +
     b_main_pt         * bspt_time +
     b_cost            * (bspt_cost + bspt_bs_cost) 
-  
+  + b_tr * 1
   
   #-- 11. ????????????????????? PT_BS --#
   V[['PT_BS']] =
@@ -218,6 +222,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt         * ptbs_time +
     b_main_bs         * ptbs_bs_time +
     b_cost            * (ptbs_bs_cost + ptbs_cost) 
+  + b_tr * 1
   
   #-- 12. ?????????????????? RHS_PT --#
   V[['RHS_PT']] =
@@ -226,6 +231,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_wait      * (rhspt_rhs_wait + rhspt_wait) +
     b_main_pt        * rhspt_time +
     b_cost           * (rhspt_cost + rhspt_rhs_cost)
+  + b_tr * 1
   
   #-- 13. ??????????????????????????? Bic_PT_RHS --#
   V[['Bic_PT_RHS']] =
@@ -235,7 +241,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt         * bpr_time +
     b_main_ridehail   * bpr_rhs_time +
     b_cost            * (bpr_cost + bpr_rhs_cost) 
-  
+  + b_tr * 2
   
   #-- 14. ?????????????????????????????? RHS_PT_RHS --#
   V[['RHS_PT_RHS']] =
@@ -245,6 +251,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt         * rpr_time +
     b_main_ridehail   * rpr_rhs2_time +
     b_cost            * (rpr_cost + rpr_rhs_cost + rpr_rhs2_cost)
+  + b_tr * 2
   
   #-- 15. BS???PT???BS BS_PT_BS --#
   V[['BS_PT_BS']] =
@@ -256,6 +263,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt       * bspbs_time +
     b_main_bs       * bspbs_bs2_time +
     b_cost          * (bspbs_cost + bspbs_bs1_cost + bspbs_bs2_cost) 
+  + b_tr * 2
   
   #-- 16. BS???PT???RHS BS_PT_RHS --#
   V[['BS_PT_RHS']] =
@@ -267,6 +275,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt          * bspr_time +
     b_main_ridehail    * bspr_rhs_time +
     b_cost             * (bspr_cost + bspr_rhs_cost + bspr_bs_cost) 
+  + b_tr * 2
   
   #-- 17. Drv???PT???BS Drv_PT_BS --#
   V[['Drv_PT_BS']] =
@@ -279,6 +288,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt          * dpbs_time +
     b_main_bs          * dpbs_bs_time +
     b_cost             * (dpbs_bs_cost + dpbs_drv_cost + dpbs_drv_park + dpbs_cost)
+  + b_tr * 2
   
   #-- 18. RHS???PT???BS RHS_PT_BS --#
   V[['RHS_PT_BS']] =
@@ -289,7 +299,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_ridehail    * rpbs_rhs_time +
     b_main_bs          * rpbs_bs_time +
     b_cost             * (rpbs_bs_cost + rpbs_cost + rpbs_rhs_cost) 
-  
+  + b_tr * 2
   
   #-- 19. Bic???PT???BS Bic_PT_BS --#
   V[['Bic_PT_BS']] =
@@ -300,6 +310,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_bic         * bpbs_bic_time +
     b_main_bs          * bpbs_bs_time +
     b_cost             * (bpbs_cost + bpbs_bs_cost)
+  + b_tr * 2
   
   #-- 20. Drv???PT???RHS Drv_PT_RHS --#
   V[['Drv_PT_RHS']] =
@@ -309,7 +320,7 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt          * dpr_time +
     b_main_ridehail    * dpr_rhs_time +
     b_cost             * (dpr_cost + dpr_rhs_cost + dpr_drv_cost + dpr_park_cost)
-  
+  + b_tr * 2
   
   
   ### Define settings for MNL model component
