@@ -51,6 +51,15 @@ apollo_beta = c(
   b_main_drive     = -0.01,
   b_main_ridehail  = -0.04,
   
+  
+  b_Fl_bic       = -0.03,
+  b_Fl_bs        = -0.03,
+  b_Fl_drive     = -0.01,
+  b_Fl_ridehail  = -0.04,
+  
+  b_transfer=-0.1,
+  b_carry=0,
+  
   # Error component
   sigma_ec_BS      =  0,
   
@@ -136,34 +145,40 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
   V[["Drv"]] =
     ASC_Drv +
     b_main_drive * drv_time +
-    b_cost * (drv_cost + park_cost)
+    b_cost * (drv_cost + park_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["PT"]] =
     ASC_PT +
     b_wait * pt_wait +
     b_main_pt * pt_time +
-    b_cost * pt_cost
+    b_cost * pt_cost+
+    b_transfer* transfer+b_carry*carryover
   
   V[["RHS"]] =
     ASC_RHS +
     b_wait * rhs_wait +
     b_main_ridehail * rhs_time +
-    b_cost * rhs_cost
+    b_cost * rhs_cost+
+    b_transfer* transfer+b_carry*carryover
   
   V[["BS"]] =
     ASC_BS +
     b_main_bs * bs_time +
     b_walk * bs_walk +
-    b_cost * bs_cost
+    b_cost * bs_cost +
+    b_transfer* transfer+b_carry*carryover
   
   V[["Walk"]] =
     ASC_Walk +
     b_walk * walk_time +
-    ec_BS
+    ec_BS+
+    b_transfer* transfer+b_carry*carryover
   
   V[["Bic"]] =
     ASC_Bic +
-    b_main_bic * bic_time
+    b_main_bic * bic_time+
+    b_transfer* transfer+b_carry*carryover
   
   # ---------------- Two-mode alternatives ---------------- #
   
@@ -172,21 +187,24 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_bic * bicpt_bic_time +
     b_main_pt * bicpt_time +
     b_wait * bicpt_wait +
-    b_cost * bicpt_cost
+    b_cost * bicpt_cost+
+    b_transfer* transfer+b_carry*carryover
   
   V[["Drv_PT"]] =
     ASC_Drv + ASC_PT +
     b_main_drive * drpt_drv_time +
     b_wait * drpt_wait +
     b_main_pt * drpt_time +
-    b_cost * (drpt_drv_cost + drpt_park_cost + drpt_cost)
+    b_cost * (drpt_drv_cost + drpt_park_cost + drpt_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["PT_RHS"]] =
     ASC_PT + ASC_RHS +
     b_wait * (ptrs_wait + ptrs_rhs_wait) +
     b_main_pt * ptrs_time +
     b_main_ridehail * ptrs_rhs_time +
-    b_cost * (ptrs_cost + ptrs_rhs_cost)
+    b_cost * (ptrs_cost + ptrs_rhs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["BS_PT"]] =
     ASC_BS + ASC_PT +
@@ -194,7 +212,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_wait * bspt_wait +
     b_main_bs * bspt_bs_time +
     b_main_pt * bspt_time +
-    b_cost * (bspt_cost + bspt_bs_cost)
+    b_cost * (bspt_cost + bspt_bs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["PT_BS"]] =
     ASC_PT + ASC_BS +
@@ -202,14 +221,16 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_walk * ptbs_bs_walk +
     b_main_pt * ptbs_time +
     b_main_bs * ptbs_bs_time +
-    b_cost * (ptbs_bs_cost + ptbs_cost)
+    b_cost * (ptbs_bs_cost + ptbs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["RHS_PT"]] =
     ASC_RHS + ASC_PT +
     b_main_ridehail * rhspt_rhs_time +
     b_wait * (rhspt_rhs_wait + rhspt_wait) +
     b_main_pt * rhspt_time +
-    b_cost * (rhspt_cost + rhspt_rhs_cost)
+    b_cost * (rhspt_cost + rhspt_rhs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   # ---------------- Three-mode alternatives ---------------- #
   
@@ -219,7 +240,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_bic * bpr_bic_time +
     b_main_pt * bpr_time +
     b_main_ridehail * bpr_rhs_time +
-    b_cost * (bpr_cost + bpr_rhs_cost)
+    b_cost * (bpr_cost + bpr_rhs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["RHS_PT_RHS"]] =
     ASC_RHS + ASC_PT +
@@ -227,7 +249,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_ridehail * rpr_rhs_time +
     b_main_pt * rpr_time +
     b_main_ridehail * rpr_rhs2_time +
-    b_cost * (rpr_cost + rpr_rhs_cost + rpr_rhs2_cost)
+    b_cost * (rpr_cost + rpr_rhs_cost + rpr_rhs2_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["BS_PT_BS"]] =
     ASC_BS + ASC_PT +
@@ -236,7 +259,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_bs * bspbs_bs1_time +
     b_main_pt * bspbs_time +
     b_main_bs * bspbs_bs2_time +
-    b_cost * (bspbs_cost + bspbs_bs1_cost + bspbs_bs2_cost)
+    b_cost * (bspbs_cost + bspbs_bs1_cost + bspbs_bs2_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["BS_PT_RHS"]] =
     ASC_BS + ASC_PT + ASC_RHS +
@@ -245,7 +269,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_bs * bspr_bs_time +
     b_main_pt * bspr_time +
     b_main_ridehail * bspr_rhs_time +
-    b_cost * (bspr_cost + bspr_rhs_cost + bspr_bs_cost)
+    b_cost * (bspr_cost + bspr_rhs_cost + bspr_bs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["Drv_PT_BS"]] =
     ASC_Drv + ASC_PT + ASC_BS +
@@ -254,7 +279,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_wait * dpbs_wait +
     b_main_pt * dpbs_time +
     b_main_bs * dpbs_bs_time +
-    b_cost * (dpbs_bs_cost + dpbs_drv_cost + dpbs_drv_park + dpbs_cost)
+    b_cost * (dpbs_bs_cost + dpbs_drv_cost + dpbs_drv_park + dpbs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["RHS_PT_BS"]] =
     ASC_RHS + ASC_PT + ASC_BS +
@@ -263,7 +289,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt * rpbs_time +
     b_main_ridehail * rpbs_rhs_time +
     b_main_bs * rpbs_bs_time +
-    b_cost * (rpbs_bs_cost + rpbs_cost + rpbs_rhs_cost)
+    b_cost * (rpbs_bs_cost + rpbs_cost + rpbs_rhs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["Bic_PT_BS"]] =
     ASC_Bic + ASC_PT + ASC_BS +
@@ -272,7 +299,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_main_pt * bpbs_time +
     b_main_bic * bpbs_bic_time +
     b_main_bs * bpbs_bs_time +
-    b_cost * (bpbs_cost + bpbs_bs_cost)
+    b_cost * (bpbs_cost + bpbs_bs_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   V[["Drv_PT_RHS"]] =
     ASC_Drv + ASC_PT + ASC_RHS +
@@ -280,7 +308,8 @@ apollo_probabilities <- function(apollo_beta, apollo_inputs, functionality = "es
     b_wait * (dpr_wait + dpr_rhs_wait) +
     b_main_pt * dpr_time +
     b_main_ridehail * dpr_rhs_time +
-    b_cost * (dpr_cost + dpr_rhs_cost + dpr_drv_cost + dpr_park_cost)
+    b_cost * (dpr_cost + dpr_rhs_cost + dpr_drv_cost + dpr_park_cost)+
+    b_transfer* transfer+b_carry*carryover
   
   # ---------------- Shared alternative / availability definitions ---------------- #
   
