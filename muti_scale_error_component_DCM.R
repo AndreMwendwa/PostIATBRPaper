@@ -52,10 +52,10 @@ apollo_beta = c(
   b_main_ridehail  = -0.04,
   
   
-  b_Fl_bic       = -0.03,
-  b_Fl_bs        = -0.03,
-  b_Fl_drive     = -0.01,
-  b_Fl_ridehail  = -0.04,
+  # b_Fl_bic       = -0.03,
+  # b_Fl_bs        = -0.03,
+  # b_Fl_drive     = -0.01,
+  # b_Fl_ridehail  = -0.04,
   
   b_transfer=-0.1,
   b_carry=0,
