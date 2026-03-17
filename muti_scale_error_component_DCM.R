@@ -24,7 +24,7 @@ apollo_control = list(
   modelDescr      = "Mixed logit with round-specific scale parameters for MaaS alternatives",
   indivID         = "PersonID",
   mixing          = TRUE,
-  nCores          = 63,
+  nCores          = 8,
   outputDirectory = "output"
 )
 
